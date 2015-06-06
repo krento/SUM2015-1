@@ -83,15 +83,18 @@ VOID GlobeBuild( VOID )
 /* Рисование четырехугольника */
 VOID DrawQuad( HDC hDC, VEC P0, VEC P1, VEC P2, VEC P3, INT W, INT H )
 {
-  VEC Norm = VecCrossVec(VecSubVec(P3, P0), VecSubVec(P1, P0));
+  /* VEC Norm = VecCrossVec(VecSubVec(P3, P0), VecSubVec(P1, P0)); */
   POINT pnts[4];
 
+  /*
   if (P3.X == P0.X && P3.Y == P0.Y && P3.Z == P0.Z)
     Norm = VecCrossVec(VecSubVec(P2, P0), VecSubVec(P1, P0));
-
+  */
   /* back-face culling */
+  /*
   if (Norm.Z < 0)
     return;
+  */
 
   pnts[0].x = P0.X + W / 2;
   pnts[0].y = -P0.Y + H / 2;
@@ -105,6 +108,11 @@ VOID DrawQuad( HDC hDC, VEC P0, VEC P1, VEC P2, VEC P3, INT W, INT H )
   pnts[3].x = P3.X + W / 2;
   pnts[3].y = -P3.Y + H / 2;
 
+  if ((pnts[0].x - pnts[1].x) * (pnts[0].y + pnts[1].y) +
+      (pnts[1].x - pnts[2].x) * (pnts[1].y + pnts[2].y) +
+      (pnts[2].x - pnts[3].x) * (pnts[2].y + pnts[3].y) +
+      (pnts[3].x - pnts[0].x) * (pnts[3].y + pnts[0].y) < 0)
+    return;
 
   Polygon(hDC, pnts, 4);
 } /* End of 'DrawQuad' function */
