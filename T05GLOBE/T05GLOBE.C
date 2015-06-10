@@ -39,6 +39,19 @@ INT WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
   HWND hWnd;
   MSG msg;
   /* HINSTANCE hIns = LoadLibrary("shell32"); */
+  DOUBLE x = 30, s, c, D2RC = PI / 180;
+
+  x = x * PI / 180;
+  x = sin(x);
+  x = 30;
+  __asm {
+    fld x
+    fmul D2RC
+    fsincos
+    fstp c
+    fstp s
+  }
+
 
   /* Регистрация класса окна */
   wc.style = CS_VREDRAW | CS_HREDRAW; /* Стиль окна: полностью перерисовывать
