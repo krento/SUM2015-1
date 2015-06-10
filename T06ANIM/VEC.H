@@ -18,7 +18,7 @@
 
 /* Множитель для преобразования градусов в радианы */
 #define DEGREE2RADIANL 0.01745329251994329576L
-extern LDBL MultiplierDegree2Radian;
+extern LDBL VG4_MultiplierDegree2Radian;
 
 /* тип для вектора в простанстве */
 typedef struct tagVEC
@@ -32,6 +32,432 @@ typedef struct tagMATR
   DBL A[4][4]; /* элементы матрицы */
 } MATR;
 
+/***
+ * Функции работы с векторами
+ ***/
+
+__inline VEC VecSet( DBL X, DBL Y, DBL Z )
+{
+  VEC v;
+
+  v.X = X;
+  v.Y = Y;
+  v.Z = Z;
+  return v;
+} /* End of 'VecSet' function */
+
+__inline VEC VecAddVec( VEC V1, VEC V2 )
+{
+  return VecSet(V1.X + V2.X, V1.Y + V2.Y, V1.Z + V2.Z);
+} /* End of 'VecAddVec' function */
+
+__inline VEC VecSubVec( VEC V1, VEC V2 )
+{
+  return VecSet(V1.X - V2.X, V1.Y - V2.Y, V1.Z - V2.Z);
+} /* End of 'VecSubVec' function */
+
+__inline VEC VecMulNum( VEC V1, DBL N )
+{
+  return VecSet(V1.X * N, V1.Y * N, V1.Z * N);
+} /* End of 'VecMulNum' function */
+
+__inline VEC VecDivNum( VEC V1, DBL N )
+{
+  return VecSet(V1.X / N, V1.Y / N, V1.Z / N);
+} /* End of 'VecDivNum' function */
+
+__inline VEC VecNeg( VEC V )
+{
+  return VecSet(-V.X, -V.Y, -V.Z);
+} /* End of 'VecNeg' function */
+
+/* скалярное произведение векторов */
+__inline DBL VecDotVec( VEC V1, VEC V2 )
+{
+  return V1.X * V2.X + V1.Y * V2.Y + V1.Z * V2.Z;
+} /* End of 'VecDotVec' function */
+
+/* векторное произведение векторов */
+__inline VEC VecCrossVec( VEC V1, VEC V2 )
+{
+  return VecSet(V1.Y * V2.Z - V1.Z * V2.Y,
+                V1.Z * V2.X - V1.X * V2.Z,
+                V1.X * V2.Y - V1.Y * V2.X);
+} /* End of 'VecCrossVec' function */
+
+/* квадрат длины вектора */
+__inline DBL VecLen2( VEC V )
+{
+  return V.X * V.X + V.Y * V.Y + V.Z * V.Z;
+} /* End of 'VecLen2' function */
+
+/* длина вектора */
+__inline DBL VecLen( VEC V )
+{
+  DBL len = V.X * V.X + V.Y * V.Y + V.Z * V.Z;
+
+  if (len != 0 && len != 1)
+    return sqrt(len);
+  return len;
+} /* End of 'VecLen' function */
+
+/* нормирование вектора */
+__inline VEC VecNormalize( VEC V )
+{
+  DBL len = V.X * V.X + V.Y * V.Y + V.Z * V.Z;
+  if (len != 0 && len != 1)
+  {
+    len = sqrt(len);
+    return VecSet(V.X / len, V.Y / len,  V.Z / len);
+  }
+  return V;
+} /* End of 'VecNormalize' function */
+
+/* умножение вектора на матрицу (с учетом однородной координаты) */
+__inline VEC VecMulMatr( VEC V, MATR M )
+{
+  DBL w = V.X * M.A[0][3] + V.Y * M.A[1][3] + V.Z * M.A[2][3] + M.A[3][3];
+
+  return VecSet((V.X * M.A[0][0] + V.Y * M.A[1][0] + V.Z * M.A[2][0] + M.A[3][0]) / w,
+                (V.X * M.A[0][1] + V.Y * M.A[1][1] + V.Z * M.A[2][1] + M.A[3][1]) / w,
+                (V.X * M.A[0][2] + V.Y * M.A[1][2] + V.Z * M.A[2][2] + M.A[3][2]) / w);
+} /* End of 'VecMulMatr' function */
+
+/***
+ * Функции работы с матрицами
+ ***/
+
+/* единичная матрица */
+#define VG4_UNIT_MATR \
+{                 \
+  {               \
+    {1, 0, 0, 0}, \
+    {0, 1, 0, 0}, \
+    {0, 0, 1, 0}, \
+    {0, 0, 0, 1}  \
+  }               \
+}
+
+__inline MATR MatrIdentity( VOID )
+{
+  static MATR m = VG4_UNIT_MATR;
+
+  return m;
+} /* End of 'MatrIdentity' function */
+
+__inline MATR MatrTranslate( DBL Dx, DBL Dy, DBL Dz )
+{
+  MATR m = VG4_UNIT_MATR;
+
+  m.A[3][0] = Dx;
+  m.A[3][1] = Dy;
+  m.A[3][2] = Dz;
+  return m;
+} /* End of 'MatrTranslate' function */
+
+__inline MATR MatrScale( DBL Sx, DBL Sy, DBL Sz )
+{
+  MATR m = VG4_UNIT_MATR;
+
+  m.A[0][0] = Sx;
+  m.A[1][1] = Sy;
+  m.A[2][2] = Sz;
+  return m;
+} /* End of 'MatrScale' function */
+
+__inline MATR MatrRotateX( DBL AngleInDegree )
+{
+  DBL sine, cosine;
+  MATR m = VG4_UNIT_MATR;
+
+  __asm {
+    /* FST(0) Angle (from degree to radian) */
+    fld  AngleInDegree
+    fmul VG4_MultiplierDegree2Radian
+
+    /* FST(0) - cos, FST(1) - sin */
+    fsincos
+
+    fstp cosine /* cos -> cosine */
+    fstp sine   /* sin -> sine */
+  }
+  m.A[1][1] = cosine;
+  m.A[2][2] = cosine;
+  m.A[1][2] = sine;
+  m.A[2][1] = -sine;
+  return m;
+} /* End of 'MatrRotateX' function */
+
+__inline MATR MatrRotateY( DBL AngleInDegree )
+{
+  DBL sine, cosine;
+  MATR m = VG4_UNIT_MATR;
+
+  __asm {
+    /* FST(0) Angle (from degree to radian) */
+    fld  AngleInDegree
+    fmul VG4_MultiplierDegree2Radian
+
+    /* FST(0) - cos, FST(1) - sin */
+    fsincos
+
+    fstp cosine /* cos -> cosine */
+    fstp sine   /* sin -> sine */
+  }
+  m.A[0][0] = cosine;
+  m.A[2][2] = cosine;
+  m.A[2][0] = sine;
+  m.A[0][2] = -sine;
+  return m;
+} /* End of 'MatrRotateY' function */
+
+__inline MATR MatrRotateZ( DBL AngleInDegree )
+{
+  DBL sine, cosine;
+  MATR m = VG4_UNIT_MATR;
+
+  __asm {
+    /* FST(0) Angle (from degree to radian) */
+    fld  AngleInDegree
+    fmul VG4_MultiplierDegree2Radian
+
+    /* FST(0) - cos, FST(1) - sin */
+    fsincos
+
+    fstp cosine /* cos -> cosine */
+    fstp sine   /* sin -> sine */
+  }
+  m.A[0][0] = cosine;
+  m.A[1][1] = cosine;
+  m.A[0][1] = sine;
+  m.A[1][0] = -sine;
+  return m;
+} /* End of 'MatrRotateZ' function */
+
+__inline MATR MatrRotate( DBL AngleInDegree,
+                          DBL X, DBL Y, DBL Z )
+{
+  DBL sine, cosine, len;
+  MATR m = VG4_UNIT_MATR;
+
+  AngleInDegree /= 2;
+  __asm {
+    /* FST(0) Angle (from degree to radian) */
+    fld  AngleInDegree
+    fmul VG4_MultiplierDegree2Radian
+
+    /* FST(0) - cos, FST(1) - sin */
+    fsincos
+
+    fstp cosine /* cos -> cosine */
+    fstp sine   /* sin -> sine */
+  }
+
+  /* определили длину вектора */
+  len = X * X + Y * Y + Z * Z;
+  if (len != 0 && len != 1)
+  {
+    len = sqrt(len);
+    X /= len;
+    Y /= len;
+    Z /= len;
+  }
+
+  X *= sine;
+  Y *= sine;
+  Z *= sine;
+  m.A[0][0] = 1 - 2 * (Y * Y + Z * Z);
+  m.A[0][1] = 2 * X * Y - 2 * cosine * Z;
+  m.A[0][2] = 2 * cosine * Y + 2 * X * Z;
+  m.A[0][3] = 0;
+  m.A[1][0] = 2 * X * Y + 2 * cosine * Z;
+  m.A[1][1] = 1 - 2 * (X * X + Z * Z);
+  m.A[1][2] = 2 * Y * Z - 2 * cosine * X;
+  m.A[1][3] = 0;
+  m.A[2][0] = 2 * X * Z - 2 * cosine * Y;
+  m.A[2][1] = 2 * cosine * X + 2 * Y * Z;
+  m.A[2][2] = 1 - 2 * (X * X + Y * Y);
+  m.A[2][3] = 0;
+  m.A[3][0] = 0;
+  m.A[3][1] = 0;
+  m.A[3][2] = 0;
+  m.A[3][3] = 1;
+  return m;
+} /* End of 'MatrRotate' function */
+ 
+__inline MATR MatrMulMatr( MATR M1, MATR M2 )
+{
+  INT i, j, k;
+  MATR r;
+
+  for (i = 0; i < 4; i++)
+    for (j = 0; j < 4; j++)
+      for (r.A[i][j] = 0, k = 0; k < 4; k++)
+        r.A[i][j] += M1.A[i][k] * M2.A[k][j];
+  return r;
+} /* End of 'MatrMulMatr' function */
+ 
+__inline MATR MatrTranspose( MATR M )
+{
+  INT i, j;
+  MATR r;
+
+  for (i = 0; i < 4; i++)
+    for (j = 0; j < 4; j++)
+      r.A[i][j] = M.A[j][i];
+  return r;
+} /* End of 'MatrTranspose' function */
+
+__inline DBL MatrDeterm3x3( DBL A11, DBL A12, DBL A13,
+                            DBL A21, DBL A22, DBL A23,
+                            DBL A31, DBL A32, DBL A33 )
+{
+  return A11 * A22 * A33 -
+         A11 * A23 * A32 -
+         A12 * A21 * A33 +
+         A12 * A23 * A31 +
+         A13 * A21 * A32 - 
+         A13 * A22 * A31;
+} /* End of 'MatrDeterm3x3' function */
+
+__inline DBL MatrDeterm( MATR M )
+{
+  return
+    M.A[0][0] * MatrDeterm3x3(M.A[1][1], M.A[1][2], M.A[1][3],
+                              M.A[2][1], M.A[2][2], M.A[2][3],
+                              M.A[3][1], M.A[3][2], M.A[3][3]) - 
+    M.A[0][1] * MatrDeterm3x3(M.A[1][0], M.A[1][2], M.A[1][3],
+                              M.A[2][0], M.A[2][2], M.A[2][3],
+                              M.A[3][0], M.A[3][2], M.A[3][3]) +
+    M.A[0][2] * MatrDeterm3x3(M.A[1][0], M.A[1][1], M.A[1][3],
+                              M.A[2][0], M.A[2][1], M.A[2][3],
+                              M.A[3][0], M.A[3][1], M.A[3][3]) -
+    M.A[0][3] * MatrDeterm3x3(M.A[1][0], M.A[1][1], M.A[1][2],
+                              M.A[2][0], M.A[2][1], M.A[2][2],
+                              M.A[3][0], M.A[3][1], M.A[3][2]);
+} /* End of 'MatrDeterm' function */
+
+__inline MATR MatrInverse( MATR M )
+{
+  MATR r;
+  DBL det = MatrDeterm(M);
+
+  if (det == 0)
+  {
+    static MATR m = VG4_UNIT_MATR;
+
+    return m;
+  }
+
+  /* строим присоединенную матрицу (adjoint matrix) */
+  r.A[0][0] =
+    MatrDeterm3x3(M.A[1][1], M.A[1][2], M.A[1][3],
+                  M.A[2][1], M.A[2][2], M.A[2][3],
+                  M.A[3][1], M.A[3][2], M.A[3][3]);
+  r.A[1][0] =
+    -MatrDeterm3x3(M.A[1][0], M.A[1][2], M.A[1][3],
+                   M.A[2][0], M.A[2][2], M.A[2][3],
+                   M.A[3][0], M.A[3][2], M.A[3][3]);
+  r.A[2][0] =
+    MatrDeterm3x3(M.A[1][0], M.A[1][1], M.A[1][3],
+                  M.A[2][0], M.A[2][1], M.A[2][3],
+                  M.A[3][0], M.A[3][1], M.A[3][3]);
+  r.A[3][0] =
+    -MatrDeterm3x3(M.A[1][0], M.A[1][1], M.A[1][2],
+                   M.A[2][0], M.A[2][1], M.A[2][2],
+                   M.A[3][0], M.A[3][1], M.A[3][2]);
+
+  r.A[0][1] =
+    -MatrDeterm3x3(M.A[0][1], M.A[0][2], M.A[0][3],
+                  M.A[2][1], M.A[2][2], M.A[2][3],
+                  M.A[3][1], M.A[3][2], M.A[3][3]);
+  r.A[1][1] =
+    MatrDeterm3x3(M.A[0][0], M.A[0][2], M.A[0][3],
+                  M.A[2][0], M.A[2][2], M.A[2][3],
+                  M.A[3][0], M.A[3][2], M.A[3][3]);
+  r.A[2][1] =
+    -MatrDeterm3x3(M.A[0][0], M.A[0][1], M.A[0][3],
+                   M.A[2][0], M.A[2][1], M.A[2][3],
+                   M.A[3][0], M.A[3][1], M.A[3][3]);
+  r.A[3][1] =
+    MatrDeterm3x3(M.A[0][0], M.A[0][1], M.A[0][2],
+                  M.A[2][0], M.A[2][1], M.A[2][2],
+                  M.A[3][0], M.A[3][1], M.A[3][2]);
+
+  r.A[0][2] =
+    MatrDeterm3x3(M.A[0][1], M.A[0][2], M.A[0][3],
+                 M.A[1][1], M.A[1][2], M.A[1][3],
+                 M.A[3][1], M.A[3][2], M.A[3][3]);
+  r.A[1][2] =
+    -MatrDeterm3x3(M.A[0][0], M.A[0][2], M.A[0][3],
+                   M.A[1][0], M.A[1][2], M.A[1][3],
+                   M.A[3][0], M.A[3][2], M.A[3][3]);
+  r.A[2][2] =
+    MatrDeterm3x3(M.A[0][0], M.A[0][1], M.A[0][3],
+                  M.A[1][0], M.A[1][1], M.A[1][3],
+                  M.A[3][0], M.A[3][1], M.A[3][3]);
+  r.A[3][2] =
+    -MatrDeterm3x3(M.A[0][0], M.A[0][1], M.A[0][2],
+                   M.A[1][0], M.A[1][1], M.A[1][2],
+                   M.A[3][0], M.A[3][1], M.A[3][2]);
+
+  r.A[0][3] =
+    -MatrDeterm3x3(M.A[0][1], M.A[0][2], M.A[0][3],
+                  M.A[1][1], M.A[1][2], M.A[1][3],
+                  M.A[2][1], M.A[2][2], M.A[2][3]);
+ 
+  r.A[1][3] =
+    MatrDeterm3x3(M.A[0][0], M.A[0][2], M.A[0][3],
+                  M.A[1][0], M.A[1][2], M.A[1][3],
+                  M.A[2][0], M.A[2][2], M.A[2][3]);
+  r.A[2][3] =
+    -MatrDeterm3x3(M.A[0][0], M.A[0][1], M.A[0][3],
+                   M.A[1][0], M.A[1][1], M.A[1][3],
+                   M.A[2][0], M.A[2][1], M.A[2][3]);
+  r.A[3][3] =
+    MatrDeterm3x3(M.A[0][0], M.A[0][1], M.A[0][2],
+                  M.A[1][0], M.A[1][1], M.A[1][2],
+                  M.A[2][0], M.A[2][1], M.A[2][2]);
+
+  /* делим на определитель */
+  r.A[0][0] /= det;
+  r.A[1][0] /= det;
+  r.A[2][0] /= det;
+  r.A[3][0] /= det;
+  r.A[0][1] /= det;
+  r.A[1][1] /= det;
+  r.A[2][1] /= det;
+  r.A[3][1] /= det;
+  r.A[0][2] /= det;
+  r.A[1][2] /= det;
+  r.A[2][2] /= det;
+  r.A[3][2] /= det;
+  r.A[0][3] /= det;
+  r.A[1][3] /= det;
+  r.A[2][3] /= det;
+  r.A[3][3] /= det;
+
+  return r;
+} /* End of 'MatrInverse' function */
+
+__inline MATR MatrView( VEC Loc, VEC At, VEC Up1 )
+{
+  VEC
+    Dir = VecNormalize(VecSubVec(At, Loc)),
+    Right = VecNormalize(VecCrossVec(Dir, Up1)),
+    Up = VecNormalize(VecCrossVec(Right, Dir));
+  MATR m =
+  {
+    {
+      {               Right.X,                Up.X,              -Dir.X, 0},
+      {               Right.Y,                Up.Y,              -Dir.Y, 0},
+      {               Right.Z,                Up.Z,              -Dir.X, 0},
+      {-VecDotVec(Loc, Right), -VecDotVec(Loc, Up), VecDotVec(Loc, Dir), 1}
+    }
+  };
+
+  return m;
+} /* End of 'MatrView' function */
 
 #endif /* __VEC_H_ */
 

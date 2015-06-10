@@ -1,16 +1,20 @@
 /* FILENAME: MAIN.C
  * PROGRAMMER: VG4
  * PURPOSE: Animation startup module
- * LAST UPDATE: 06.06.2015
+ * LAST UPDATE: 10.06.2015
  */
 
-#include "obj3d.h"
+#include "anim.h"
+#include "units.h"
 
 #define WND_CLASS_NAME "My Window Class Name"
 
 /* Ссылки вперед */
 LRESULT CALLBACK MainWindowFunc( HWND hWnd, UINT Msg,
                                  WPARAM wParam, LPARAM lParam );
+
+/* Глобальная переменная - счетчик прокрутки колеса мыши */
+INT VG4_MouseWheel;
 
 /* Главная функция программы.
  * АРГУМЕНТЫ:
@@ -29,6 +33,7 @@ LRESULT CALLBACK MainWindowFunc( HWND hWnd, UINT Msg,
 INT WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
                     CHAR *CmdLine, INT ShowCmd )
 {
+  INT i;
   WNDCLASSEX wc;
   HWND hWnd;
   MSG msg;
@@ -71,6 +76,12 @@ INT WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
   /* Отрисовать немедленно */
   UpdateWindow(hWnd);
 
+  /*** Добавление объектов ***/
+  for (i = 0; i < 1; i++)
+    VG4_AnimAddUnit(VG4_UnitBallCreate());
+  VG4_AnimAddUnit(VG4_UnitModelCreate());
+  VG4_AnimAddUnit(VG4_UnitControlCreate());
+
   /* Запуск цикла обработки сообщений */
   while (GetMessage(&msg, NULL, 0, 0))
   {
@@ -106,21 +117,28 @@ LRESULT CALLBACK MainWindowFunc( HWND hWnd, UINT Msg,
   {
   case WM_CREATE:
     SetTimer(hWnd, 30, 1, NULL);
-    ObjLoad("cow.object");
+    VG4_AnimInit(hWnd);
     return 0;
-  case WM_SYSKEYDOWN:
-    break;
   case WM_SIZE:
+    VG4_AnimResize(LOWORD(lParam), HIWORD(lParam));
+    VG4_AnimRender();
     return 0;
   case WM_TIMER:
+    VG4_AnimRender();
+    VG4_AnimCopyFrame();
+    return 0;
+  case WM_MOUSEWHEEL:
+    VG4_MouseWheel += (SHORT)HIWORD(wParam) / WHEEL_DELTA;
     return 0;
   case WM_ERASEBKGND:
     return 1;
   case WM_PAINT:
     hDC = BeginPaint(hWnd, &ps);
     EndPaint(hWnd, &ps);
+    VG4_AnimCopyFrame();
     return 0;
   case WM_DESTROY:
+    VG4_AnimClose();
     PostQuitMessage(0);
     KillTimer(hWnd, 30);
     return 0;
@@ -128,6 +146,4 @@ LRESULT CALLBACK MainWindowFunc( HWND hWnd, UINT Msg,
   return DefWindowProc(hWnd, Msg, wParam, lParam);
 } /* End of 'MainWindowFunc' function */
 
-/* END OF 'STARTUP.C' FILE */
-
-
+/* END OF 'MAIN.C' FILE */

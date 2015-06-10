@@ -7,6 +7,6 @@
 #include "vec.h"
 
 /* ћножитель дл€ преобразовани€ градусов в радианы */
-LDBL MultiplierDegree2Radian = DEGREE2RADIANL;
+LDBL VG4_MultiplierDegree2Radian = DEGREE2RADIANL;
 
 /* END OF 'VEC.C' FILE */

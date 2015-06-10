@@ -183,25 +183,77 @@
 				>
 			</File>
 			<File
-				RelativePath=".\LOADOBJ.C"
-				>
-			</File>
-			<File
 				RelativePath=".\MAIN.C"
 				>
 			</File>
-			<File
-				RelativePath=".\OBJ3D.H"
+			<Filter
+				Name="Animation System"
 				>
-			</File>
-			<File
-				RelativePath=".\VEC.C"
+				<File
+					RelativePath=".\ANIM.C"
+					>
+				</File>
+				<File
+					RelativePath=".\ANIM.H"
+					>
+				</File>
+				<File
+					RelativePath=".\UNIT.C"
+					>
+				</File>
+				<Filter
+					Name="Rendering"
+					>
+					<File
+						RelativePath=".\RENDER.C"
+						>
+					</File>
+					<File
+						RelativePath=".\RENDER.H"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="3D Object Support"
 				>
-			</File>
-			<File
-				RelativePath=".\VEC.H"
+				<File
+					RelativePath=".\IMAGE.C"
+					>
+				</File>
+				<File
+					RelativePath=".\IMAGE.H"
+					>
+				</File>
+				<File
+					RelativePath=".\VEC.C"
+					>
+				</File>
+				<File
+					RelativePath=".\VEC.H"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Units"
 				>
-			</File>
+				<File
+					RelativePath=".\UBALL.C"
+					>
+				</File>
+				<File
+					RelativePath=".\UCONTRL.C"
+					>
+				</File>
+				<File
+					RelativePath=".\UMODEL.C"
+					>
+				</File>
+				<File
+					RelativePath=".\UNITS.H"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
