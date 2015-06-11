@@ -21,7 +21,8 @@ typedef struct tagvg4GOBJ
 /* Матрицы */
 extern MATR
   VG4_RndMatrWorld,
-  VG4_RndMatrView;
+  VG4_RndMatrView,
+  VG4_RndMatrProj;
 
 /* Параметры проецирования */
 extern DBL

@@ -50,17 +50,22 @@ static VOID VG4_AnimUnitClose( vg4UNIT_MODEL *Uni, vg4ANIM *Ani )
  */
 static VOID VG4_AnimUnitRender( vg4UNIT_MODEL *Uni, vg4ANIM *Ani )
 {
-  VG4_RndMatrView = MatrView(VecSet(30, 30, 30),
+  INT i;
+
+  VG4_RndMatrView = MatrView(VecSet(8, 8, 8),
                              VecSet(0, 0, 0),
                              VecSet(0, 1, 0));
 
-  VG4_RndMatrWorld =
-    MatrMulMatr(MatrMulMatr(MatrMulMatr(
-      MatrTranslate(Ani->JX * 59, Ani->JY * 88, 0),
-      MatrScale(0.1, 0.1, 0.1)),
-      MatrRotateY(30 * Ani->Time + Ani->JR * 180)),
-      MatrTranslate(0, 0, 100 * Ani->JZ));
-  VG4_RndGObjDraw(&Uni->Model);
+  for (i = 0; i < 8; i++)
+  {
+    VG4_RndMatrWorld =
+      MatrMulMatr(MatrMulMatr(MatrMulMatr(
+        MatrTranslate(Ani->JX * 59, Ani->JY * 88, 0),
+        MatrScale(0.1, 0.1, 0.1)),
+        MatrRotateY(30 * Ani->Time + Ani->JR * 180)),
+        MatrTranslate((i - 2) * 2, 0, 100 * Ani->JZ));
+    VG4_RndGObjDraw(&Uni->Model);
+  }
 } /* End of 'VG4_AnimUnitRender' function */
 
 /* Функция создания объекта анимации "модель".

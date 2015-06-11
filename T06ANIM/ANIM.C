@@ -117,6 +117,11 @@ VOID VG4_AnimResize( INT W, INT H )
     VG4_RndWp = (DBL)W / H * 3, VG4_RndHp = 3;
   else
     VG4_RndHp = (DBL)H / W * 3, VG4_RndWp = 3;
+
+  VG4_RndMatrProj = MatrFrustum(-VG4_RndWp / 2, VG4_RndWp / 2,
+                                -VG4_RndHp / 2, VG4_RndHp / 2,
+                                VG4_RndProjDist, 800);
+
 } /* End of 'VG4_AnimResize' function */
 
 /* Функция построения кадра анимации.

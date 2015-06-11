@@ -14,7 +14,8 @@
 MATR
   VG4_RndMatrWorld = VG4_UNIT_MATR,
   VG4_RndMatrView = VG4_UNIT_MATR,
-  VG4_RndMatrWorldView = VG4_UNIT_MATR;
+  VG4_RndMatrProj = VG4_UNIT_MATR,
+  VG4_RndMatrWorldViewProj = VG4_UNIT_MATR;
 
 /* Параметры проецирования */
 DBL
@@ -34,17 +35,13 @@ POINT VG4_RndWorldToScreen( VEC P )
   VEC Pp;
 
   /* преобразование СК */
-  P = VecMulMatr(P, VG4_RndMatrWorldView);
+  Pp = VecMulMatr(P, VG4_RndMatrWorldViewProj);
 
-  Pp.X = P.X * VG4_RndProjDist / -P.Z;
-  Pp.Y = P.Y * VG4_RndProjDist / -P.Z;
-
-  Ps.x = VG4_Anim.W / 2 + Pp.X * VG4_Anim.W / VG4_RndWp;
-  Ps.y = VG4_Anim.H / 2 - Pp.Y * VG4_Anim.H / VG4_RndHp;
+  Ps.x = ((Pp.X + 1) / 2) * VG4_Anim.W;
+  Ps.y = ((1 - Pp.Y) / 2) * VG4_Anim.H;
 
   return Ps;
 } /* End of 'VG4_RndWorldToScreen' function */
-
 
 /* Функция загрузки геометрического объекта.
  * АРГУМЕНТЫ:
@@ -132,7 +129,7 @@ VOID VG4_RndGObjDraw( vg4GOBJ *GObj )
     return;
 
   /* проецируем все точки */
-  VG4_RndMatrWorldView = MatrMulMatr(VG4_RndMatrWorld, VG4_RndMatrView);
+  VG4_RndMatrWorldViewProj = MatrMulMatr(MatrMulMatr(VG4_RndMatrWorld, VG4_RndMatrView), VG4_RndMatrProj);
   for (i = 0; i < GObj->NumOfV; i++)
     pnts[i] = VG4_RndWorldToScreen(GObj->V[i]);
 

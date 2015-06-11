@@ -459,6 +459,21 @@ __inline MATR MatrView( VEC Loc, VEC At, VEC Up1 )
   return m;
 } /* End of 'MatrView' function */
 
+__inline MATR MatrFrustum( DBL Left, DBL Right, DBL Bottom, DBL Top, DBL Near, DBL Far )
+{
+  MATR m =
+  {
+    {
+      {      2 * Near / (Right - Left),                               0,                              0,  0},
+      {                              0,       2 * Near / (Top - Bottom),                              0,  0},
+      {(Right + Left) / (Right - Left), (Top + Bottom) / (Top - Bottom),   -(Far + Near) / (Far - Near), -1},
+      {                              0,                               0, -2 * Near * Far / (Far - Near),  0}
+    }
+  };
+
+  return m;
+} /* End of 'MatrFrustum' function */
+
 #endif /* __VEC_H_ */
 
 /* END OF 'VEC.H' FILE */
