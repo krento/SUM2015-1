@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OBJ2G3D", "OBJ2G3D.vcproj", "{D08ECA59-3E47-46FF-80EF-E3FEBD474081}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D08ECA59-3E47-46FF-80EF-E3FEBD474081}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D08ECA59-3E47-46FF-80EF-E3FEBD474081}.Debug|Win32.Build.0 = Debug|Win32
+		{D08ECA59-3E47-46FF-80EF-E3FEBD474081}.Release|Win32.ActiveCfg = Release|Win32
+		{D08ECA59-3E47-46FF-80EF-E3FEBD474081}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
