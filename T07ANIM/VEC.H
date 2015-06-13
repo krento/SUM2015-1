@@ -148,6 +148,14 @@ __inline VEC VecMulMatr( VEC V, MATR M )
                 (V.X * M.A[0][2] + V.Y * M.A[1][2] + V.Z * M.A[2][2] + M.A[3][2]) / w);
 } /* End of 'VecMulMatr' function */
 
+/* умножение свободного вектора на матрицу */
+__inline VEC VecMulMatr3( VEC V, MATR M )
+{
+  return VecSet(V.X * M.A[0][0] + V.Y * M.A[1][0] + V.Z * M.A[2][0],
+                V.X * M.A[0][1] + V.Y * M.A[1][1] + V.Z * M.A[2][1],
+                V.X * M.A[0][2] + V.Y * M.A[1][2] + V.Z * M.A[2][2]);
+} /* End of 'VecMulMatr3' function */
+
 /***
  * Функции работы с матрицами
  ***/

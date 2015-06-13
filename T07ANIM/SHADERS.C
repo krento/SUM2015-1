@@ -1,7 +1,7 @@
 /* FILENAME: SHADERS.C
  * PROGRAMMER: VG4
  * PURPOSE: Shader support module.
- * LAST UPDATE: 11.06.2015
+ * LAST UPDATE: 13.06.2015
  */
 
 #include <stdio.h>
@@ -39,16 +39,20 @@ static CHAR * VG4_TextLoad( CHAR *FileName )
   FILE *F;
   CHAR *mem = NULL;
 
+  /* Открываем текстовый файл */
   if ((F = fopen(FileName, "r")) != NULL)
   {
     LONG len;
 
+    /* измеряем длину файла */
     fseek(F, 0, SEEK_END);
     len = ftell(F);
 
+    /* выделяем память под текст */
     if ((mem = malloc(len + 1)) != NULL)
     {
       fseek(F, 0, SEEK_SET);
+      /* загружаем файл в память */
       len = fread(mem, 1, len, F);
       mem[len] = 0;
     }
@@ -68,24 +72,28 @@ UINT VG4_ShaderLoad( CHAR *FileNamePrefix )
 {
   INT res, i;
   CHAR *txt;
+  INT NumOfShaders = 2;
   UINT
-    Shaders[2] = {0}, Prg = 0,
-    ShTypes[2] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
+    Shaders[2] = {0},
+    ShTypes[2] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER},
+     Prg = 0;
   CHAR *Suff[2] = {"VERT", "FRAG"};
   BOOL isok = TRUE;
   static CHAR Buf[1000];
 
   /* загружаем шейдера */
 
-  for (i = 0; i < 2; i++)
+  for (i = 0; i < NumOfShaders; i++)
   {
     sprintf(Buf, "%s.%s", FileNamePrefix, Suff[i]);
+    /* создаем в памяти шейдер */
     if ((Shaders[i] = glCreateShader(ShTypes[i])) == 0)
     {
       isok = FALSE;
       VG4_SaveLog("Error create shader");
       break;
     }
+    /* загружаем файл */
     if ((txt = VG4_TextLoad(Buf)) == NULL)
     {
       isok = FALSE;
@@ -116,7 +124,7 @@ UINT VG4_ShaderLoad( CHAR *FileNamePrefix )
     else
     {
       /* присоединяем к программе шейдера */
-      for (i = 0; i < 2; i++)
+      for (i = 0; i < NumOfShaders; i++)
         if (Shaders[i] != 0)
           glAttachShader(Prg, Shaders[i]);
       /* компонуем программу */
@@ -155,7 +163,21 @@ UINT VG4_ShaderLoad( CHAR *FileNamePrefix )
  */
 VOID VG4_ShaderFree( UINT PrgId )
 {
+  UINT i, n, shdrs[5];
+
+  if (PrgId == 0)
+    return;
+
+  /* получаем присоединенные шейдера */
+  glGetAttachedShaders(PrgId, 5, &n, shdrs);
+
+  /* удаляем */
+  for (i = 0; i < n; i++)
+  {
+    glDetachShader(PrgId, shdrs[i]);
+    glDeleteShader(shdrs[i]);
+  }
+  glDeleteProgram(PrgId);
 } /* End of 'VG4_ShaderFree' function */
 
 /* END OF 'RENDER.C' FILE */
-

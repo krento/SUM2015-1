@@ -218,6 +218,18 @@
 						RelativePath=".\SHADERS.C"
 						>
 					</File>
+					<Filter
+						Name="Geometry Support"
+						>
+						<File
+							RelativePath=".\GEOM.C"
+							>
+						</File>
+						<File
+							RelativePath=".\PRIM.C"
+							>
+						</File>
+					</Filter>
 				</Filter>
 			</Filter>
 			<Filter

@@ -84,6 +84,14 @@ BOOL VG4_AnimInit( HWND hWnd )
 
   VG4_RndProg = VG4_ShaderLoad("TEST");
 
+  glActiveTexture(GL_TEXTURE0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  glActiveTexture(GL_TEXTURE1);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
   /* Инициализация таймера */
   QueryPerformanceFrequency(&li);
   TimeFreq = li.QuadPart;
@@ -266,7 +274,7 @@ VOID VG4_AnimRender( VOID )
   glClearColor(0.3, 0.5, 0.7, 1);
   glClearDepth(1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glColorMask(TRUE, TRUE, TRUE, FALSE);
+  glColorMask(TRUE, TRUE, TRUE, TRUE);
 
 
   /*

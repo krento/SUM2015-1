@@ -29,30 +29,24 @@ DBL
 /* Шейдер по умолчанию */
 UINT VG4_RndProg;
 
-typedef struct tagVERTEX
-{
-  VEC P;   /* позиция */
-  COLOR C; /* Цвет */
-} VERTEX;
-
 /* Функция загрузки геометрического объекта.
  * АРГУМЕНТЫ:
  *   - структура объекта для загрузки:
- *       vg4GOBJ *GObj;
+ *       vg4PRIM *GObj;
  *   - имя файла:
  *       CHAR *FileName;
  * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
  *   (BOOL) TRUE при успехе, FALSE иначе.
  */
-BOOL VG4_RndGObjLoad( vg4GOBJ *GObj, CHAR *FileName )
+BOOL VG4_PrimLoad( vg4PRIM *GObj, CHAR *FileName )
 {
   FILE *F;
-  VERTEX *V;
+  vg4VERTEX *V;
   INT (*Facets)[3];
   INT nv = 0, nf = 0;
   static CHAR Buf[10000];
 
-  memset(GObj, 0, sizeof(vg4GOBJ));
+  memset(GObj, 0, sizeof(vg4PRIM));
   /* Open file */
   if ((F = fopen(FileName, "r")) == NULL)
     return FALSE;
@@ -67,12 +61,13 @@ BOOL VG4_RndGObjLoad( vg4GOBJ *GObj, CHAR *FileName )
   }
 
   /* Allocate memory for data */
-  if ((V = malloc(sizeof(VERTEX) * nv + sizeof(INT [3]) * nf)) == NULL)
+  if ((V = malloc(sizeof(vg4VERTEX) * nv + sizeof(INT [3]) * nf)) == NULL)
   {
     fclose(F);
     return FALSE;
   }
   Facets = (INT (*)[3])(V + nv);
+  memset(V, 0, sizeof(vg4VERTEX) * nv + sizeof(INT [3]) * nf);
 
   /* Read vertices */
   rewind(F);
@@ -102,103 +97,65 @@ BOOL VG4_RndGObjLoad( vg4GOBJ *GObj, CHAR *FileName )
     }
   }
   fclose(F);
-
-  GObj->NumOfV = nv;
-  GObj->NumOfF = nf;
-
-  /* отправляем в OpenGL */
-  glGenVertexArrays(1, &GObj->VA);
-  glGenBuffers(1, &GObj->VBuf);
-  glGenBuffers(1, &GObj->IBuf);
-
-  /* делаем активным массив вершин */
-  glBindVertexArray(GObj->VA);
-  /* делаем активным буфер вершин */
-  glBindBuffer(GL_ARRAY_BUFFER, GObj->VBuf);
-  /* сливаем данные */
-  glBufferData(GL_ARRAY_BUFFER, sizeof(VERTEX) * GObj->NumOfV, V, GL_STATIC_DRAW);
-  /* делаем активным буфер индексов */
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GObj->IBuf);
-  /* сливаем данные */
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(INT [3]) * GObj->NumOfF, Facets, GL_STATIC_DRAW);
-
-  /* задаем порядок данных */
-  /*                    layout,
-   *                       количество компонент,
-   *                          тип,
-   *                                    надо ли нормировать,
-   *                                           размер в байтах одного элемента буфера,
-   *                                                           смещение в байтах до начала данных */
-  glVertexAttribPointer(0, 3, GL_FLOAT, FALSE, sizeof(VERTEX), (VOID *)0); /* позиция */
-  glVertexAttribPointer(1, 4, GL_FLOAT, FALSE, sizeof(VERTEX), (VOID *)sizeof(VEC)); /* цвет */
-
-  /* включаем нужные аттрибуты (layout) */
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
+  VG4_PrimCreate(GObj, VG4_PRIM_TRIMESH, nv, nf * 3, V, (INT *)Facets);
 
   /* освобождаем оперативную память */
   free(V);
   return TRUE;
-} /* End of 'VG4_RndGObjLoad' function */
+} /* End of 'VG4_PrimLoad' function */
 
-/* Функция отрисовки геометрического объекта.
+/* Функция загрузки текстуры.
  * АРГУМЕНТЫ:
- *   - структура объекта для загрузки:
- *       vg4GOBJ *GObj;
- * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ: Нет.
+ *   - имя файла:
+ *       CHAR *FileName;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (INT ) идентификатор OpenGL для текстуры.
  */
-VOID VG4_RndGObjDraw( vg4GOBJ *GObj )
+INT VG4_TextureLoad( CHAR *FileName )
 {
-  INT loc;
+  INT TexId = 0;
+  HDC hMemDC;
+  BITMAP bm;
+  HBITMAP hBm;
+  DWORD *Bits;
 
-  VG4_RndMatrWorldViewProj = MatrMulMatr(MatrMulMatr(VG4_RndMatrWorld, VG4_RndMatrView), VG4_RndMatrProj);
+  /* загружаем изображение из файла */
+  hBm = LoadImage(NULL, FileName, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+  if (hBm == NULL)
+    return 0;
 
-  glLoadMatrixf(VG4_RndMatrWorldViewProj.A[0]);
+  /* Create compatible context and select image into one */
+  hMemDC = CreateCompatibleDC(VG4_Anim.hDC);
+  SelectObject(hMemDC, hBm);
 
-  /* рисуем треугольники */
-  glBindVertexArray(GObj->VA);
-  glUseProgram(VG4_RndProg);
+  /* Obtain image size */
+  GetObject(hBm, sizeof(BITMAP), &bm);
+  if ((Bits = malloc(sizeof(DWORD) * bm.bmWidth * bm.bmHeight)) != NULL)
+  {
+    INT x, y, r, g, b;
+    COLORREF c;
 
-  loc = glGetUniformLocation(VG4_RndProg, "MatrWorld");
-  if (loc != -1)
-    glUniformMatrix4fv(loc, 1, FALSE, VG4_RndMatrWorld.A[0]);
-  loc = glGetUniformLocation(VG4_RndProg, "MatrView");
-  if (loc != -1)
-    glUniformMatrix4fv(loc, 1, FALSE, VG4_RndMatrView.A[0]);
-  loc = glGetUniformLocation(VG4_RndProg, "MatrProj");
-  if (loc != -1)
-    glUniformMatrix4fv(loc, 1, FALSE, VG4_RndMatrProj.A[0]);
-  loc = glGetUniformLocation(VG4_RndProg, "Time");
-  if (loc != -1)
-    glUniform1f(loc, VG4_Anim.Time);
+    for (y = 0; y < bm.bmHeight; y++)
+      for (x = 0; x < bm.bmWidth; x++)
+      {
+        c = GetPixel(hMemDC, x, y);
+        r = GetRValue(c);
+        g = GetGValue(c);
+        b = GetBValue(c);
+        Bits[(bm.bmHeight - 1 - y) * bm.bmWidth + x] = 0xFF000000 | (r << 16) | (g << 8) | b;
+      }
+      glGenTextures(1, &TexId);
+      glBindTexture(GL_TEXTURE_2D, TexId);
+      gluBuild2DMipmaps(GL_TEXTURE_2D, 4, bm.bmWidth, bm.bmHeight,
+        GL_BGRA_EXT, GL_UNSIGNED_BYTE, Bits);
+      glBindTexture(GL_TEXTURE_2D, 0);
+    free(Bits);
+  }
+  DeleteDC(hMemDC);
+  DeleteObject(hBm);
+  return TexId;
+} /* End of 'VG4_TextureLoadfunction */
 
-
-  glDrawElements(GL_TRIANGLES, GObj->NumOfF * 3, GL_UNSIGNED_INT, NULL);
-  glUseProgram(0);
-  glBindVertexArray(0);
-} /* End of 'VG4_RndGObjDraw' function */
-
-/* Функция освобождения памяти из-под геометрического объекта.
- * АРГУМЕНТЫ:
- *   - структура объекта для загрузки:
- *       vg4GOBJ *GObj;
- * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ: Нет.
- */
-VOID VG4_RndGObjFree( vg4GOBJ *GObj )
-{
-  /* делаем активным массив вершин */
-  glBindVertexArray(GObj->VA);
-  /* "отцепляем" буфера */
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  glDeleteBuffers(1, &GObj->VBuf);
-  glDeleteBuffers(1, &GObj->IBuf);
-  /* делаем неактивным массив вершин */
-  glBindVertexArray(0);
-  glDeleteVertexArrays(1, &GObj->VA);
-
-  memset(GObj, 0, sizeof(vg4GOBJ));
-} /* End of 'VG4_RndGObjFree' function */
 
 /* END OF 'RENDER.C' FILE */
 
