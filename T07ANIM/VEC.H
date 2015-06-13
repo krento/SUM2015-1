@@ -1,7 +1,7 @@
 /* FILENAME: VEC.H
  * PROGRAMMER: VG4
  * PURPOSE: 3D math declaration module.
- * LAST UPDATE: 06.06.2015
+ * LAST UPDATE: 13.06.2015
  */
 
 #ifndef __VEC_H_
@@ -39,16 +39,39 @@ typedef struct tagCOLOR
   FLT R, G, B, A; /* компоненты цвета + прозрачность (0..1) */
 } COLOR;
 
+/* Функция получения случайного числа в диапазоне [0.0 .. 1.0].
+ * АРГУМЕНТЫ: Нет.
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (DBL) итоговое случайное число.
+ */
 __inline DBL Rnd0( VOID )
 {
   return (DBL)rand() / RAND_MAX;
 } /* End of 'Rnd0' function */
 
+/* Функция получения случайного числа в диапазоне [-1.0 .. 1.0].
+ * АРГУМЕНТЫ: Нет.
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (DBL) итоговое случайное число.
+ */
 __inline DBL Rnd1( VOID )
 {
   return 2.0 * rand() / RAND_MAX - 1;
 } /* End of 'Rnd1' function */
 
+
+/***
+ * Функции работы с цветом
+ ***/
+
+
+/* Функция построения цвета.
+ * АРГУМЕНТЫ:
+ *   - цветовые компоненты:
+ *       FLT R, G, B, A;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (COLOR) собранное в один тип значение цвета.
+ */
 __inline COLOR ColorSet( FLT R, FLT G, FLT B, FLT A )
 {
   COLOR c = {R, G, B, A};
@@ -61,6 +84,13 @@ __inline COLOR ColorSet( FLT R, FLT G, FLT B, FLT A )
  * Функции работы с векторами
  ***/
 
+/* Функция построения вектора.
+ * АРГУМЕНТЫ:
+ *   - коорлинаты вектора:
+ *       FLT X, Y, Z;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (COLOR) собранное в один тип значение вектора.
+ */
 __inline VEC VecSet( FLT X, FLT Y, FLT Z )
 {
   VEC v;
@@ -71,38 +101,89 @@ __inline VEC VecSet( FLT X, FLT Y, FLT Z )
   return v;
 } /* End of 'VecSet' function */
 
+/* Функция сложения двух векторов.
+ * АРГУМЕНТЫ:
+ *   - складываемые векторы:
+ *       VEC V1, V2;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (VEC) результирующий вектор.
+ */
 __inline VEC VecAddVec( VEC V1, VEC V2 )
 {
   return VecSet(V1.X + V2.X, V1.Y + V2.Y, V1.Z + V2.Z);
 } /* End of 'VecAddVec' function */
 
+/* Функция вычитания двух векторов.
+ * АРГУМЕНТЫ:
+ *   - вычитаемые векторы:
+ *       VEC V1, V2;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (VEC) результирующий вектор.
+ */
 __inline VEC VecSubVec( VEC V1, VEC V2 )
 {
   return VecSet(V1.X - V2.X, V1.Y - V2.Y, V1.Z - V2.Z);
 } /* End of 'VecSubVec' function */
 
-__inline VEC VecMulNum( VEC V1, FLT N )
+/* Функция умножения вектора на число.
+ * АРГУМЕНТЫ:
+ *   - умножаемый вектор:
+ *       VEC V;
+ *   - умножаемое число:
+ *       FLT N;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (VEC) результирующий вектор.
+ */
+__inline VEC VecMulNum( VEC V, FLT N )
 {
-  return VecSet(V1.X * N, V1.Y * N, V1.Z * N);
+  return VecSet(V.X * N, V.Y * N, V.Z * N);
 } /* End of 'VecMulNum' function */
 
+/* Функция умножения вектора на число.
+ * АРГУМЕНТЫ:
+ *   - умножаемый вектор:
+ *       VEC V;
+ *   - число делитель:
+ *       FLT N;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (VEC) результирующий вектор.
+ */
 __inline VEC VecDivNum( VEC V1, FLT N )
 {
   return VecSet(V1.X / N, V1.Y / N, V1.Z / N);
 } /* End of 'VecDivNum' function */
 
+/* Функция отрицания (смены направления) вектора.
+ * АРГУМЕНТЫ:
+ *   - отрицаемый вектор:
+ *       VEC V;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (VEC) результирующий вектор.
+ */
 __inline VEC VecNeg( VEC V )
 {
   return VecSet(-V.X, -V.Y, -V.Z);
 } /* End of 'VecNeg' function */
 
-/* скалярное произведение векторов */
+/* Функция скалярного произведения двух векторов.
+ * АРГУМЕНТЫ:
+ *   - умножаемые векторы:
+ *       VEC V1, V2;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (FLT) результирующее число.
+ */
 __inline FLT VecDotVec( VEC V1, VEC V2 )
 {
   return V1.X * V2.X + V1.Y * V2.Y + V1.Z * V2.Z;
 } /* End of 'VecDotVec' function */
 
-/* векторное произведение векторов */
+/* Функция векторного произведения двух векторов.
+ * АРГУМЕНТЫ:
+ *   - умножаемые векторы:
+ *       VEC V1, V2;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (VEC) результирующий вектор.
+ */
 __inline VEC VecCrossVec( VEC V1, VEC V2 )
 {
   return VecSet(V1.Y * V2.Z - V1.Z * V2.Y,
@@ -110,13 +191,25 @@ __inline VEC VecCrossVec( VEC V1, VEC V2 )
                 V1.X * V2.Y - V1.Y * V2.X);
 } /* End of 'VecCrossVec' function */
 
-/* квадрат длины вектора */
+/* Функция вычисления квадрата длины вектора.
+ * АРГУМЕНТЫ:
+ *   - вычисляемый вектор:
+ *       VEC V;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (FLT) результирующее число.
+ */
 __inline FLT VecLen2( VEC V )
 {
   return V.X * V.X + V.Y * V.Y + V.Z * V.Z;
 } /* End of 'VecLen2' function */
 
-/* длина вектора */
+/* Функция вычисления длины вектора.
+ * АРГУМЕНТЫ:
+ *   - вычисляемый вектор:
+ *       VEC V;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (FLT) результирующее число.
+ */
 __inline FLT VecLen( VEC V )
 {
   FLT len = V.X * V.X + V.Y * V.Y + V.Z * V.Z;
@@ -126,19 +219,31 @@ __inline FLT VecLen( VEC V )
   return len;
 } /* End of 'VecLen' function */
 
-/* нормирование вектора */
+/* Функция нормирования (приведения к единичной длине) вектора.
+ * АРГУМЕНТЫ:
+ *   - нормируемый вектор:
+ *       VEC V;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (VEC) результирующий вектор.
+ */
 __inline VEC VecNormalize( VEC V )
 {
   FLT len = V.X * V.X + V.Y * V.Y + V.Z * V.Z;
+
   if (len != 0 && len != 1)
-  {
-    len = sqrt(len);
-    return VecSet(V.X / len, V.Y / len,  V.Z / len);
-  }
+    return len = sqrt(len), VecSet(V.X / len, V.Y / len,  V.Z / len);
   return V;
 } /* End of 'VecNormalize' function */
 
-/* умножение вектора на матрицу (с учетом однородной координаты) */
+/* Функция умножения вектора на матрицу (с учетом однородной координаты).
+ * АРГУМЕНТЫ:
+ *   - умножаемый вектор:
+ *       VEC V;
+ *   - умножаемая матрица:
+ *       MATR M;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (VEC) результирующий вектор.
+ */
 __inline VEC VecMulMatr( VEC V, MATR M )
 {
   FLT w = V.X * M.A[0][3] + V.Y * M.A[1][3] + V.Z * M.A[2][3] + M.A[3][3];
@@ -148,13 +253,37 @@ __inline VEC VecMulMatr( VEC V, MATR M )
                 (V.X * M.A[0][2] + V.Y * M.A[1][2] + V.Z * M.A[2][2] + M.A[3][2]) / w);
 } /* End of 'VecMulMatr' function */
 
-/* умножение свободного вектора на матрицу */
+/* Функция умножения свободного вектора на матрицу (учитывается только ориентация).
+ * АРГУМЕНТЫ:
+ *   - умножаемый вектор:
+ *       VEC V;
+ *   - умножаемая матрица:
+ *       MATR M;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (VEC) результирующий вектор.
+ */
 __inline VEC VecMulMatr3( VEC V, MATR M )
 {
   return VecSet(V.X * M.A[0][0] + V.Y * M.A[1][0] + V.Z * M.A[2][0],
                 V.X * M.A[0][1] + V.Y * M.A[1][1] + V.Z * M.A[2][1],
                 V.X * M.A[0][2] + V.Y * M.A[1][2] + V.Z * M.A[2][2]);
 } /* End of 'VecMulMatr3' function */
+
+/* Функция умножения вектора на матрицу (без учета однородной координаты).
+ * АРГУМЕНТЫ:
+ *   - умножаемый вектор:
+ *       VEC V;
+ *   - умножаемая матрица:
+ *       MATR M;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (VEC) результирующий вектор.
+ */
+__inline VEC VecMulMatr43( VEC V, MATR M )
+{
+  return VecSet(V.X * M.A[0][0] + V.Y * M.A[1][0] + V.Z * M.A[2][0] + M.A[3][0],
+                V.X * M.A[0][1] + V.Y * M.A[1][1] + V.Z * M.A[2][1] + M.A[3][1],
+                V.X * M.A[0][2] + V.Y * M.A[1][2] + V.Z * M.A[2][2] + M.A[3][2]);
+} /* End of 'VecMulMatr43' function */
 
 /***
  * Функции работы с матрицами
@@ -171,6 +300,11 @@ __inline VEC VecMulMatr3( VEC V, MATR M )
   }               \
 }
 
+/* Функция установки матрицы в единичную (отсутствие преобразования СК).
+ * АРГУМЕНТЫ: Нет.
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (MATR) результирующая матрица.
+ */
 __inline MATR MatrIdentity( VOID )
 {
   static MATR m = VG4_UNIT_MATR;
@@ -178,6 +312,13 @@ __inline MATR MatrIdentity( VOID )
   return m;
 } /* End of 'MatrIdentity' function */
 
+/* Функция установки матрицы в матрицу параллельного переноса СК.
+ * АРГУМЕНТЫ:
+ *   - смещение по осям:
+ *       FLT Dx, Dy, Dz;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (MATR) результирующая матрица.
+ */
 __inline MATR MatrTranslate( FLT Dx, FLT Dy, FLT Dz )
 {
   MATR m = VG4_UNIT_MATR;
@@ -188,6 +329,13 @@ __inline MATR MatrTranslate( FLT Dx, FLT Dy, FLT Dz )
   return m;
 } /* End of 'MatrTranslate' function */
 
+/* Функция установки матрицы в матрицу масштабирования СК.
+ * АРГУМЕНТЫ:
+ *   - масштабы (множители) по осям:
+ *       FLT Sx, Sy, Sz;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (MATR) результирующая матрица.
+ */
 __inline MATR MatrScale( FLT Sx, FLT Sy, FLT Sz )
 {
   MATR m = VG4_UNIT_MATR;
@@ -198,6 +346,13 @@ __inline MATR MatrScale( FLT Sx, FLT Sy, FLT Sz )
   return m;
 } /* End of 'MatrScale' function */
 
+/* Функция установки матрицы в матрицу поворота СК вокруг оси X.
+ * АРГУМЕНТЫ:
+ *   - угол поворота в градусах:
+ *       FLT AngleInDegree;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (MATR) результирующая матрица.
+ */
 __inline MATR MatrRotateX( FLT AngleInDegree )
 {
   FLT sine, cosine;
@@ -221,6 +376,13 @@ __inline MATR MatrRotateX( FLT AngleInDegree )
   return m;
 } /* End of 'MatrRotateX' function */
 
+/* Функция установки матрицы в матрицу поворота СК вокруг оси Y.
+ * АРГУМЕНТЫ:
+ *   - угол поворота в градусах:
+ *       FLT AngleInDegree;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (MATR) результирующая матрица.
+ */
 __inline MATR MatrRotateY( FLT AngleInDegree )
 {
   FLT sine, cosine;
@@ -244,6 +406,13 @@ __inline MATR MatrRotateY( FLT AngleInDegree )
   return m;
 } /* End of 'MatrRotateY' function */
 
+/* Функция установки матрицы в матрицу поворота СК вокруг оси Z.
+ * АРГУМЕНТЫ:
+ *   - угол поворота в градусах:
+ *       FLT AngleInDegree;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (MATR) результирующая матрица.
+ */
 __inline MATR MatrRotateZ( FLT AngleInDegree )
 {
   FLT sine, cosine;
@@ -267,6 +436,15 @@ __inline MATR MatrRotateZ( FLT AngleInDegree )
   return m;
 } /* End of 'MatrRotateZ' function */
 
+/* Функция установки матрицы в матрицу поворота СК вокруг радиус-вектора (X, Y, Z).
+ * АРГУМЕНТЫ:
+ *   - угол поворота в градусах:
+ *       FLT AngleInDegree;
+ *   - координаты радиус вектора поворота:
+ *       FLT X, Y, Z;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (MATR) результирующая матрица.
+ */
 __inline MATR MatrRotate( FLT AngleInDegree,
                           FLT X, FLT Y, FLT Z )
 {
@@ -318,6 +496,13 @@ __inline MATR MatrRotate( FLT AngleInDegree,
   return m;
 } /* End of 'MatrRotate' function */
  
+/* Функция произведения двух матриц.
+ * АРГУМЕНТЫ:
+ *   - умножаемые матрицы:
+ *       MATR M1, M2;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (MATR) результирующая матрица.
+ */
 __inline MATR MatrMulMatr( MATR M1, MATR M2 )
 {
   INT i, j, k;
@@ -330,6 +515,13 @@ __inline MATR MatrMulMatr( MATR M1, MATR M2 )
   return r;
 } /* End of 'MatrMulMatr' function */
  
+/* Функция транспонирования матрицы.
+ * АРГУМЕНТЫ:
+ *   - тринспонируемая матрицы:
+ *       MATR M;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (MATR) результирующая матрица.
+ */
 __inline MATR MatrTranspose( MATR M )
 {
   INT i, j;
@@ -341,6 +533,15 @@ __inline MATR MatrTranspose( MATR M )
   return r;
 } /* End of 'MatrTranspose' function */
 
+/* Функция поиска определителя матрицы 3x3.
+ * АРГУМЕНТЫ:
+ *   - элементы матрицы:
+ *       FLT A11, A12, A13,
+ *           A21, A22, A23,
+ *           A31, A32, A33;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (FLT) значение определителя.
+ */
 __inline FLT MatrDeterm3x3( FLT A11, FLT A12, FLT A13,
                             FLT A21, FLT A22, FLT A23,
                             FLT A31, FLT A32, FLT A33 )
@@ -353,6 +554,13 @@ __inline FLT MatrDeterm3x3( FLT A11, FLT A12, FLT A13,
          A13 * A22 * A31;
 } /* End of 'MatrDeterm3x3' function */
 
+/* Функция поиска определителя матрицы.
+ * АРГУМЕНТЫ:
+ *   - определяемая матрицы:
+ *       MATR M;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (FLT) значение определителя.
+ */
 __inline FLT MatrDeterm( MATR M )
 {
   return
@@ -370,6 +578,13 @@ __inline FLT MatrDeterm( MATR M )
                               M.A[3][0], M.A[3][1], M.A[3][2]);
 } /* End of 'MatrDeterm' function */
 
+/* Функция поиска обратной матрицы.
+ * АРГУМЕНТЫ:
+ *   - обращаемая матрицы:
+ *       MATR M;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (MATR) результирующая матрица.
+ */
 __inline MATR MatrInverse( MATR M )
 {
   MATR r;
@@ -473,6 +688,13 @@ __inline MATR MatrInverse( MATR M )
   return r;
 } /* End of 'MatrInverse' function */
 
+/* Функция установки матрицы в матрицу наблюдателя из заданной позиции.
+ * АРГУМЕНТЫ:
+ *   - позиция наблюдателя, точка "интереса" (куда смотрим), приблизительное направление вверх:
+ *       VEC Loc, At, Up1;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (MATR) результирующая матрица.
+ */
 __inline MATR MatrView( VEC Loc, VEC At, VEC Up1 )
 {
   VEC
@@ -492,6 +714,13 @@ __inline MATR MatrView( VEC Loc, VEC At, VEC Up1 )
   return m;
 } /* End of 'MatrView' function */
 
+/* Функция установки матрицы в матрицу центральной проекции.
+ * АРГУМЕНТЫ:
+ *   - коорлдинаты габаритных граней:
+ *       FLT Left, Right, Bottom, Top, Near, Far;
+ * ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ:
+ *   (MATR) результирующая матрица.
+ */
 __inline MATR MatrFrustum( FLT Left, FLT Right, FLT Bottom, FLT Top, FLT Near, FLT Far )
 {
   MATR m =

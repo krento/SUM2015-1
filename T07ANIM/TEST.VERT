@@ -27,7 +27,7 @@ out vec2 DrawTexCoord;
 void main( void )
 {
   //gl_Position = MatrProj * MatrView * MatrWorld * vec4(InPosition, 1);
-  gl_Position = MatrWVP * vec4(InPosition * 0.050, 1);
+  gl_Position = MatrWVP * vec4(InPosition * 1.050, 1);
   //gl_Position = vec4(InPosition, 1);
   DrawNormal = mat3(MatrWVInverse) * InNormal;
   //gl_Position = vec4(0.3, 0, 0.3, 1);

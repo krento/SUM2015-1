@@ -69,8 +69,16 @@ VOID VG4_GeomDraw( vg4GEOM *G )
 {
   INT i, loc;
 
+  /* посылаем количество частей */
+  glUseProgram(VG4_RndProg);
+  loc = glGetUniformLocation(VG4_RndProg, "TotalParts");
+  if (loc != -1)
+    glUniform1f(loc, G->NumOfPrimitives);
+  glUseProgram(0);
+
   for (i = 0; i < G->NumOfPrimitives; i++)
   {
+    /* посылаем номер текущей части */
     glUseProgram(VG4_RndProg);
     loc = glGetUniformLocation(VG4_RndProg, "PartNo");
     if (loc != -1)

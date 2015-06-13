@@ -46,7 +46,7 @@ static VOID VG4_AnimUnitInit( vg4UNIT_MODEL *Uni, vg4ANIM *Ani )
 
   VG4_PrimCreate(&Uni->Pr, VG4_PRIM_TRIMESH, 4, 6, V, I);
 
-  VG4_GeomLoad(&Uni->Model, "Elephant.g3d");
+  VG4_GeomLoad(&Uni->Model, "SHIP.g3d");
   VG4_RndPrimMatrConvert = MatrRotateX(-90);
   //VG4_GeomLoad(&Uni->Geom, "X6.G3D");
 } /* End of 'VG4_AnimUnitInit' function */

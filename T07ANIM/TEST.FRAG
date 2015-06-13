@@ -6,6 +6,7 @@
 // время
 uniform float Time;
 uniform float PartNo;
+uniform float TotalParts;
 
 // выходные параметры - цвет рисования
 out vec4 OutColor;
